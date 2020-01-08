@@ -2,7 +2,12 @@ import Elevator
 
 if __name__ == '__main__':
     elev = Elevator.classes.Elevator()
-    elev_small = Elevator.classes.SmallElevator()
+    elev_small = Elevator.classes.SmallElevator(name='ufak')
+
+    print(elev_small)
+    print(repr(elev))
+    print(repr(elev_small))
+
 
 
     while True:
@@ -21,6 +26,8 @@ if __name__ == '__main__':
 
             print(elev.__dict__)
             print(elev_small.__dict__)
+
+            print(elev_small)
 
         except ValueError:
             print("A value error occurred")
