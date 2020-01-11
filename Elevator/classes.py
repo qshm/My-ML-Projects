@@ -1,32 +1,42 @@
-import time
+from abc import ABC, abstractmethod
+from Elevator.wrappers import printlog
 
+# abc can not be instantiated itself, subclasses need to implement all abstract methods (override) but can provide
+# custom logic via super()
+# abc is a form of interface checking more strict than hasattr(), we get error upon instantiation
 
-class Elevator:
-    # speed of elevator in terms of m/s
-    speed = 1.2
-
-    # distance between each floor in terms of m
-    distance = 3
-
-    _available_floors = range(0, 16)
+class ElevatorABC(ABC):
 
     def __init__(self):
+        # speed of elevator in terms of m/s
+        self.speed = 1.2
+        # distance between each floor in terms of m
+        self.distance = 3
+        self._available_floors = range(0, 16)
+
+    @abstractmethod
+    def stats(self):
+        # this method will be provided by inheriting classes
+        print('abstract base class method printing')
+
+    @property
+    @abstractmethod
+    def floor(self):
+        # this property will be provided by inheriting classes
+        print('abstract base class property printing')
+        pass
+
+
+class Elevator(ElevatorABC):
+
+    def __init__(self):
+        super().__init__()
         self._floor = 0
         self.total_time_elapsed = 0
         self.total_distance = 0
 
         # all floors visited will be kept in the log sequentially
         self.log_floor = []
-
-    # contains as much info about obj as possible to create an accurate representation of the obj
-    def __repr__(self):
-        return '{!s}({!r},{!r},{!r})'.format(self.__class__.__name__, self.floor, self.total_time_elapsed, self.total_distance)
-
-    # human readable definition of the object.
-    def __str__(self):
-        return '{} is currently on floor: {}. It has travelled for {} meters'.format(self.__class__.__name__,
-                                                                                            self.floor, self.total_distance)
-
 
     @property
     def floor(self):
@@ -46,6 +56,7 @@ class Elevator:
             # print(f'Setting value to {destination}')
             self._floor = destination
 
+    @printlog
     def go_to_floor(self, destination):
 
         current_floor = self.floor
@@ -67,26 +78,34 @@ class Elevator:
             self.log_floor.append(destination)
 
     def stats(self):
+        super().stats()
         print(f'{self.__class__.__name__} travelled {self.total_distance} meters in {self.total_time_elapsed} seconds. \n'
               f' All floors visited: {self.log_floor}')
+
+    # contains as much info about obj as possible to create an accurate representation of the obj
+    def __repr__(self):
+        return '{!s}({!r},{!r},{!r})'.format(self.__class__.__name__, self.floor, self.total_time_elapsed, self.total_distance)
+
+    # human readable definition of the object.
+    def __str__(self):
+        return '{} is currently on floor: {}. It has travelled for {} meters'.format(self.__class__.__name__, self.floor, self.total_distance)
 
 
 class SmallElevator(Elevator):
     # demonstrates inheritance
-
-    speed = 1.1
-    _available_floors = range(0, 9)
 
     def __init__(self, *, name=None):
 
         # call __init__ on subclass as seen by the superclass
         super().__init__()
 
+        self.speed = 1.1
+        self._available_floors = range(0, 9)
 
         # name is an optional keyword argument, created as an attribute only when given.
         # Demonstrates added functionality to subclass without breaking existing function calls
 
-        if not name == None:
+        if name is not None:
             self.name = name
 
     # override parent's __repr__ method (Default Implementation of __repr__)
