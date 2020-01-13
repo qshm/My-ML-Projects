@@ -37,6 +37,19 @@ class Elevator(ElevatorABC):
 
         # all floors visited will be kept in the log sequentially
         self.log_floor = []
+        self.count = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+
+        if self.count >= len(self.log_floor):
+            raise StopIteration
+
+        self.count += 1
+
+        return self.log_floor[self.count]
 
     @property
     def floor(self):

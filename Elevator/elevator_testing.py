@@ -4,7 +4,7 @@ from Elevator.wrappers import printlog, logwrap
 
 @printlog
 def testfunc(arg1u1, arg2, kwarg1='kwarg1', kwarg2='kwarg2'):
-    print('returning testfunc')
+    pass
 
 
 testfunc(11, 22, kwarg1='sdsds', kwarg2='sdsds')
@@ -16,9 +16,9 @@ if __name__ == '__main__':
 
 
 
-    print(elev_small)
-    print(repr(elev))
-    print(repr(elev_small))
+    # print(elev_small)
+    # print(repr(elev))
+    # print(repr(elev_small))
 
 
 
@@ -28,26 +28,32 @@ if __name__ == '__main__':
             # while not isinstance(destination, int):
 
             destination = int(input(f'Which floor do you want to go? Please enter an integer \n'))
+            #
+            # elev.stats()
+            #
+            # elev_small.stats()
 
-            elev.stats()
-
-            elev_small.stats()
-
-
-
-            print(elev.__dict__)
-
-            print(elev_small.__dict__)
-
-            print(elev_small)
+            #
+            #
+            # print(elev.__dict__)
+            #
+            # print(elev_small.__dict__)
+            #
+            # print(elev_small)
 
             elev.go_to_floor(destination)
 
             elev_small.go_to_floor(destination)
 
+            print(next(elev))
+            print(next(elev_small))
 
         except ValueError:
             print("A value error occurred")
+            for item in elev:
+                print(item)
+            break
 
         except Exception:
             pass
+

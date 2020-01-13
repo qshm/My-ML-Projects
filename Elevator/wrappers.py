@@ -1,20 +1,19 @@
 from inspect import signature, getfullargspec, getargvalues
+from functools import  wraps
 
 def printlog(func):
+
+    @wraps(func)
     def printlog_wrapper(*args, **kwargs):
 
-        print(func)
-        # print('func name is:', func.__repr__)
-        # print('function arguments are:', args, kwargs)
-        print('function signature is:', getfullargspec(func)[0])
-        print('values passed to args:', locals()['args'])
-        print('values passed to kwargs:', locals()['kwargs'])
-        # print('positional arguments are:', signature(func)[0:2])
+        print(f'Calling {func.__name__} with signature:{getfullargspec(func)[0]}')
+        print('values passed to args:', locals()['args'], 'to kwargs:', list(locals()['kwargs'].values()))
         func(*args, **kwargs)
 
     return printlog_wrapper
 
-
+# ----------------------------------------------------------------------------------------------------------------------------------------------------
+#another example from stackoverflow
 class LogWrappedFunction(object):
     def __init__(self, function):
         self.function = function
@@ -26,3 +25,4 @@ class LogWrappedFunction(object):
 
 def logwrap(function):
     return LogWrappedFunction(function).logAndCall
+
