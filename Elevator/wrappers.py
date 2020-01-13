@@ -1,5 +1,7 @@
 from inspect import signature, getfullargspec, getargvalues
 from functools import  wraps
+import time
+
 
 def printlog(func):
 
@@ -11,6 +13,26 @@ def printlog(func):
         func(*args, **kwargs)
 
     return printlog_wrapper
+
+
+class Timer:
+    '''
+    Creates a context manager to measure execution time of a block of code
+    '''
+
+    def __init__(self, name):
+        self.name = name
+
+    def __enter__(self):
+        self.timer = time.time()
+
+        return self.timer
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.timer:
+
+            print(f'{self.name} execution took {time.time() - self.timer} seconds')
+            del self.timer
 
 # ----------------------------------------------------------------------------------------------------------------------------------------------------
 #another example from stackoverflow
