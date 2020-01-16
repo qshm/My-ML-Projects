@@ -8,8 +8,6 @@ from Elevator.wrappers import printlog
 class ElevatorABC(ABC):
 
     def __init__(self):
-        # speed of elevator in terms of m/s
-        self.speed = 1.2
         # distance between each floor in terms of m
         self.distance = 3
         self._available_floors = range(0, 16)
@@ -29,27 +27,37 @@ class ElevatorABC(ABC):
 
 class Elevator(ElevatorABC):
 
-    def __init__(self):
+    def __init__(self, *, speed=None):
         super().__init__()
+
+        if speed is not None:
+            # default speed of elevator in terms of m/s
+            self.speed = speed
+        else:
+            self.speed = 1.2
+
+
         self._floor = 0
         self.total_time_elapsed = 0
         self.total_distance = 0
 
         # all floors visited will be kept in the log sequentially
         self.log_floor = []
-        self.count = 0
 
     def __iter__(self):
+        self.count = 0
         return self
 
     def __next__(self):
 
-        if self.count >= len(self.log_floor):
+        if self.count <= len(self.log_floor):
+            result = self.log_floor[self.count]
+            self.count +=1
+            return result
+        else:
             raise StopIteration
 
-        self.count += 1
 
-        return self.log_floor[self.count]
 
     @property
     def floor(self):
@@ -69,6 +77,12 @@ class Elevator(ElevatorABC):
             # print(f'Setting value to {destination}')
             self._floor = destination
 
+    @classmethod
+    def slow_elevator(cls):
+        slow_speed = 1
+        return cls(speed=slow_speed)
+
+
     @printlog
     def go_to_floor(self, destination):
 
@@ -86,7 +100,7 @@ class Elevator(ElevatorABC):
                 print(f'Descending to: {self.floor}')
 
             print(f'Congratulations, you arrived at floor {self.floor}')
-            self.total_time_elapsed += abs(current_floor - self.floor) * self.distance * self.speed
+            self.total_time_elapsed += (abs(current_floor - self.floor) * self.distance) / self.speed
             self.total_distance += abs(current_floor - destination) * self.distance
             self.log_floor.append(destination)
 

@@ -15,9 +15,10 @@ with Timer('mytimer') as t:
 
 
         if __name__ == '__main__':
-            elev = Elevator.classes.Elevator()
+            elev = Elevator.classes.Elevator(speed=3)
             elev_small = Elevator.classes.SmallElevator(name='ufak')
 
+            elev_slow = elev.slow_elevator()
 
 
             # print(elev_small)
@@ -33,10 +34,11 @@ with Timer('mytimer') as t:
 
                     destination = int(input(f'Which floor do you want to go? Please enter an integer \n'))
                     #
-                    # elev.stats()
-                    #
-                    # elev_small.stats()
+                    elev.stats()
 
+                    elev_small.stats()
+
+                    elev_slow.stats()
                     #
                     #
                     # print(elev.__dict__)
@@ -46,11 +48,11 @@ with Timer('mytimer') as t:
                     # print(elev_small)
 
                     elev.go_to_floor(destination)
-
                     elev_small.go_to_floor(destination)
+                    elev_slow.go_to_floor(destination)
 
-                    print(next(elev))
-                    print(next(elev_small))
+                    for floor in elev:
+                        print('now printing floor: ', floor)
 
                 except ValueError:
                     print("A value error occurred")
