@@ -2,7 +2,6 @@ import pathlib
 
 
 def has_sub_dirs(target_dir_path=None):
-
     if target_dir_path is not None:
         gen_subs = (sub for sub in pathlib.Path(target_dir_path).iterdir() if sub.is_dir())
 
@@ -14,6 +13,7 @@ def has_sub_dirs(target_dir_path=None):
 
     else:
         raise ValueError('Target path not specified')
+
 
 def has_neighbour_dirs(target_dir_path=None):
     upper_dir = pathlib.Path(target_dir_path).parent
@@ -30,7 +30,6 @@ def has_neighbour_dirs(target_dir_path=None):
 
     else:
         raise ValueError('Target path not specified')
-
 
 
 # def get_all_subdirs(target_dir_path=None):
@@ -61,61 +60,61 @@ def has_neighbour_dirs(target_dir_path=None):
 #     else:
 #         raise ValueError
 #
-def recursive_subdir(target_dir_path=None, counter_neighbour=None, counter_sub=None):
+def recursive_subdir(target_dir_path=None):
 
-    if counter_neighbour is None:
-        counter_neighbour = 0
-    if counter_sub is None:
-        counter_sub = 0
 
     if target_dir_path is not None:
 
-        # for n in gen_neighbour_subs:
-        #     print('neighbour1:', n)
+        # if not (has_sub_dirs(target_dir_path) and has_sub_dirs(target_dir_path)):
+        #     print(target_dir_path, 'has no neighbours or subs')
+
         #
-
-        # for sub in gen_subs:
-        #     print('sub1:', sub)
-
-        if not (has_sub_dirs(target_dir_path) and has_sub_dirs(target_dir_path)):
-            print(target_dir_path, 'has no neighbours or subs')
-
-        if has_neighbour_dirs(target_dir_path):
-            print(target_dir_path, 'has neighbours')
-
-            try:
-                gen_neighbour_subs = (sub for sub in pathlib.Path(target_dir_path).parent.iterdir() if sub.is_dir())
-                neighbour = list(gen_neighbour_subs)[counter_neighbour]
-
-                print('printing neighbour', neighbour)
-                return recursive_subdir(target_dir_path=neighbour, counter_neighbour=counter_neighbour+1, counter_sub=counter_sub)
-
-            except IndexError:
-                counter_neighbour = 0
-                print(target_dir_path, 'has no more neighbours')
+        # if has_neighbour_dirs(target_dir_path):
+        #     print(target_dir_path, 'has neighbours')
+        #
+        #     try:
+        #         gen_neighbour_subs = (sub for sub in pathlib.Path(target_dir_path).parent.iterdir() if sub.is_dir())
+        #         neighbour = list(gen_neighbour_subs)[counter_neighbour]
+        #
+        #         print('printing neighbour', neighbour)
+        #         return recursive_subdir(target_dir_path=neighbour, counter_neighbour=counter_neighbour+1, counter_sub=counter_sub)
+        #
+        #     except IndexError:
+        #         counter_neighbour = 0
+        #         print(target_dir_path, 'has no more neighbours')
 
         # todo: i have to nest the has_sub_dirs inside the neighbour conditional, otherwise it does not go into it unless neighbour counter is depleted
         if has_sub_dirs(target_dir_path):
-            print(target_dir_path, 'has subs')
+            # print(target_dir_path, 'has subs')
 
-            try:
-                gen_subs = (sub for sub in pathlib.Path(target_dir_path).iterdir() if sub.is_dir())
-                sub = list(gen_subs)[counter_sub]
-                print('printing sub', sub)
-                return recursive_subdir(target_dir_path=sub, counter_neighbour=counter_neighbour, counter_sub=counter_sub+1)
+            gen_subs_name = list(sub.name for sub in pathlib.Path(target_dir_path).iterdir() if sub.is_dir())
+            # print('_-=*0*=-_-=*0*=-_-=*0*=-_-=*0*=-_-=*0*=-_-=*0*=-_-=*0*=-')
+            print(f'__________________ Subs of {target_dir_path}')
+            print(*gen_subs_name, sep='\n')
 
+            gen_subs_path = list(sub for sub in pathlib.Path(target_dir_path).iterdir() if sub.is_dir())
 
-            except IndexError:
-                print(target_dir_path, 'has no more subs')
-                counter_sub = 0
+            subs_container = []
+
+            for sub_name, sub_path in zip(gen_subs_name, gen_subs_path):
+                # print(sub_name, sep='\n')
+                # print('----------------------------------------')
+
+                subs_container.append(recursive_subdir(target_dir_path=sub_path))
+
+            print(f'----------------------------------------------------------------returning sub_container for: {target_dir_path}')
+            return subs_container
+
+        else:
+            # print(target_dir_path, 'does not have any subs, function does not return anything')
+            # print('----------------------00000000000000000000------------------')
+            pass
     else:
         raise ValueError('Target path not specified')
 
 
 if __name__ == "__main__":
-
-
-    target_dir = 'C:/tayfur/Foto PC/'
+    target_dir = 'H:/'
 
     # print(has_neighbour_dirs(target_dir))
     # print(has_sub_dirs(target_dir))
