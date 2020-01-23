@@ -1,4 +1,14 @@
 import pathlib
+import math
+
+def convert_size(size_bytes):
+   if size_bytes == 0:
+       return "0B"
+   size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+   i = int(math.floor(math.log(size_bytes, 1024)))
+   p = math.pow(1024, i)
+   s = round(size_bytes / p, 2)
+   return "%s %s" % (s, size_name[i])
 
 
 def has_sub_dirs(target_dir_path=None):
@@ -6,7 +16,7 @@ def has_sub_dirs(target_dir_path=None):
         gen_subs = (sub for sub in pathlib.Path(target_dir_path).iterdir() if sub.is_dir())
 
         try:
-            first = next(gen_subs)
+            next(gen_subs)
             return True
         except StopIteration:
             return False
@@ -14,108 +24,70 @@ def has_sub_dirs(target_dir_path=None):
     else:
         raise ValueError('Target path not specified')
 
+def recursive_subdir(target_dir_path=None, counter=None, searchfor=None):
 
-def has_neighbour_dirs(target_dir_path=None):
-    upper_dir = pathlib.Path(target_dir_path).parent
-
-    if target_dir_path is not None:
-        gen_neighbour_subs = (sub for sub in upper_dir.iterdir() if sub.is_dir())
-
-        try:
-            next(gen_neighbour_subs)
-            second = next(gen_neighbour_subs)
-            return True
-        except StopIteration:
-            return False
-
-    else:
-        raise ValueError('Target path not specified')
-
-
-# def get_all_subdirs(target_dir_path=None):
-#     if target_dir_path is not None:
-#         search_path = target_dir_path
-#
-#         while True:
-#             # print(len(list(sub for sub in search_path.iterdir() if sub.is_dir())))
-#             # print(search_path)
-#
-#             subdirs_print = (sub for sub in search_path.iterdir() if sub.is_dir())
-#             subdirs = (sub for sub in search_path.iterdir() if sub.is_dir())
-#             for sub in subdirs_print:
-#                 print(sub)
-#
-#             try:
-#                 search_path = next(subdirs)
-#                 print('Now searching: ', search_path)
-#
-#             except StopIteration:
-#                 print('Stop Iteration received')
-#                 search_path_str = os.path.dirname(search_path)
-#                 search_path = pathlib.Path(search_path_str)
-#
-#                 print(search_path)
-#
-#
-#     else:
-#         raise ValueError
-#
-def recursive_subdir(target_dir_path=None):
-
+    if counter is None:
+        counter = 0
 
     if target_dir_path is not None:
 
-        # if not (has_sub_dirs(target_dir_path) and has_sub_dirs(target_dir_path)):
-        #     print(target_dir_path, 'has no neighbours or subs')
-
-        #
-        # if has_neighbour_dirs(target_dir_path):
-        #     print(target_dir_path, 'has neighbours')
-        #
-        #     try:
-        #         gen_neighbour_subs = (sub for sub in pathlib.Path(target_dir_path).parent.iterdir() if sub.is_dir())
-        #         neighbour = list(gen_neighbour_subs)[counter_neighbour]
-        #
-        #         print('printing neighbour', neighbour)
-        #         return recursive_subdir(target_dir_path=neighbour, counter_neighbour=counter_neighbour+1, counter_sub=counter_sub)
-        #
-        #     except IndexError:
-        #         counter_neighbour = 0
-        #         print(target_dir_path, 'has no more neighbours')
+        target_name = pathlib.Path(target_dir_path).name
 
         # todo: i have to nest the has_sub_dirs inside the neighbour conditional, otherwise it does not go into it unless neighbour counter is depleted
         if has_sub_dirs(target_dir_path):
-            # print(target_dir_path, 'has subs')
+
+            indent = "|  "*counter + f"{counter}. "
+
+            filesize = sum(f.stat().st_size for f in pathlib.Path(target_dir_path).glob('**/*') if f.is_file())
+
+
+            print(f'{indent}{target_name} - {convert_size(filesize)}')
+
+            counter += 1
 
             gen_subs_name = list(sub.name for sub in pathlib.Path(target_dir_path).iterdir() if sub.is_dir())
-            # print('_-=*0*=-_-=*0*=-_-=*0*=-_-=*0*=-_-=*0*=-_-=*0*=-_-=*0*=-')
-            print(f'__________________ Subs of {target_dir_path}')
-            print(*gen_subs_name, sep='\n')
-
             gen_subs_path = list(sub for sub in pathlib.Path(target_dir_path).iterdir() if sub.is_dir())
 
             subs_container = []
 
             for sub_name, sub_path in zip(gen_subs_name, gen_subs_path):
-                # print(sub_name, sep='\n')
+                # print(sub_name, searchfor)
                 # print('----------------------------------------')
 
-                subs_container.append(recursive_subdir(target_dir_path=sub_path))
+                # print(sub_name, searchfor)
+                if sub_name == searchfor:
+                    print(f'{searchfor} found in {sub_path}, terminating...')
+                    return
+                else:
+                    subs_container.append(recursive_subdir(target_dir_path=sub_path, counter=counter, searchfor=searchfor))
 
-            print(f'----------------------------------------------------------------returning sub_container for: {target_dir_path}')
             return subs_container
 
         else:
-            # print(target_dir_path, 'does not have any subs, function does not return anything')
-            # print('----------------------00000000000000000000------------------')
-            pass
+            indent = "|  "*counter + f"{counter}. "
+
+            filesize = sum(f.stat().st_size for f in pathlib.Path(target_dir_path).glob('**/*') if f.is_file())
+
+            print(f'{indent}{target_name} - {convert_size(filesize)}')
+
+
+
+            # todo: if target has no subs, search does not stop even when found. (if has subs, stops properly, look at above logic)
+            if target_name == searchfor:
+                print(f'{searchfor} found in {target_dir_path}, terminating...')
+                return
+
+            else:
+                pass
+
     else:
         raise ValueError('Target path not specified')
 
 
 if __name__ == "__main__":
-    target_dir = 'H:/'
+    target_dir = 'D:/pictures'
 
-    # print(has_neighbour_dirs(target_dir))
-    # print(has_sub_dirs(target_dir))
+    # todo: make get file size an optional argument that can be turned on/off
+    # todo: write exception handling for access denied
+
     recursive_subdir(target_dir)
