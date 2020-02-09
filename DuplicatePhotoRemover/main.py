@@ -1,6 +1,8 @@
 import pathlib
 import math
 from collections import Counter
+import itertools
+
 
 def convert_size(size_bytes):
    if size_bytes == 0:
@@ -25,40 +27,57 @@ def has_sub_dirs(target_dir_path=None):
     else:
         raise ValueError('Target path not specified')
 
+
+
+def add_duplicates(new_duplicates):
+    duplicates = []
+    while True:
+        yield duplicates
+        duplicates = duplicates + new_duplicates
+
+
 # todo: put recursive_subdir in a class and hide implementation, user should be able to pass path only
+#  and newid or glob_duplicates should be class variables
+#  Also get total size of all duplicates and possibly move them to a directory called duplicates
+#  another step: get metadata from pictures, currently only checking filename and size to decide if duplicate
 
-def recursive_subdir(target_dir_path=None, iter_count=None, searchfor=None, duplicates=None):
+newid = itertools.count()
+glob_duplicates = []
 
-    if duplicates is None:
-        duplicates = []
+def recursive_subdir(target_dir_path=None, iter_count=None, searchfor=None):
+
 
     if iter_count is None:
         iter_count = 0
+
 
     if target_dir_path is not None:
 
         target_name = pathlib.Path(target_dir_path).name
 
-        # todo: i have to nest the has_sub_dirs inside the neighbour conditional, otherwise it does not go into it unless neighbour iter_count is depleted
+
         if has_sub_dirs(target_dir_path):
 
             indent = "|  "*iter_count + f"{iter_count}. "
+
+            # newid is a counter that increments every time it's called, unlike iter_count, which is set to 0 beginning of each function call
+            print('else: subfolder no', next(newid))
 
             # use glob('**/*') if need to iterate over all sub directories
             filesize = sum(f.stat().st_size for f in pathlib.Path(target_dir_path).glob('*') if f.is_file())
             filenum = sum(1 for f in pathlib.Path(target_dir_path).glob('*') if f.is_file())
 
-            new = [(f.name, convert_size(f.stat().st_size)) for f in pathlib.Path(target_dir_path).glob('*') if (f.is_file())]
-            duplicates = duplicates + new
 
             print(f'{indent}{target_name} - {convert_size(filesize)} - {filenum} files')
 
+            new = [(f.name, convert_size(f.stat().st_size)) for f in pathlib.Path(target_dir_path).glob('*') if (f.is_file())]
+
+            glob_duplicates.extend(new)
+
             # turned off printing counter here, bec I actually only need to print when there are no more subfolders (in else below)
-            dup_count = Counter(duplicates)
-            print(len(duplicates))
+            # dup_count = Counter(duplicates)
+            # print(len(duplicates))
             # print(Counter(el for el in dup_count.elements() if dup_count[el] > 1))
-
-
 
             iter_count += 1
 
@@ -76,27 +95,31 @@ def recursive_subdir(target_dir_path=None, iter_count=None, searchfor=None, dupl
                     print(f'{searchfor} found in {sub_path}, terminating...')
                     return
                 else:
-                    subs_container.append(recursive_subdir(target_dir_path=sub_path, iter_count=iter_count, duplicates=duplicates,searchfor=searchfor))
+                    subs_container.append(recursive_subdir(target_dir_path=sub_path, iter_count=iter_count, searchfor=searchfor))
 
             return subs_container
 
         else:
             indent = "|  "*iter_count + f"{iter_count}. "
 
+            # newid is a counter that increments every time it's called, unlike iter_count, which is set to 0 beginning of each function call
+            print('else: subfolder no', next(newid))
+
             filesize = sum(f.stat().st_size for f in pathlib.Path(target_dir_path).glob('*') if f.is_file())
             filenum = sum(1 for f in pathlib.Path(target_dir_path).glob('*') if f.is_file())
 
             new = [(f.name, convert_size(f.stat().st_size)) for f in pathlib.Path(target_dir_path).glob('*') if (f.is_file())]
-            duplicates = duplicates + new
+            # temp = glob_duplicates + new
+            glob_duplicates.extend(new)
 
-            # todo: updated value of duplicates not passed to global duplicates when this else terminates with "pass"
-            # todo: so when no more subs, duplicate count reverts back. need a way to update global duplicates (maybe with generator?)
 
             print(f'{indent}{target_name} - {convert_size(filesize)} - {filenum} files')
 
-            dup_count = Counter(duplicates)
-
-            print('printing else:',len(duplicates))
+            #
+            dup_count = Counter(glob_duplicates)
+            #
+            # print('printing else:',len(glob_duplicates))
+            # print(glob_duplicates)
             print(Counter(el for el in dup_count.elements() if dup_count[el] > 1))
 
 
@@ -113,10 +136,10 @@ def recursive_subdir(target_dir_path=None, iter_count=None, searchfor=None, dupl
 
 
 if __name__ == "__main__":
-    target_dir = 'C:/tayfur/Foto PC/'
+    target_dir = 'C:/tayfur/Foto PC'
 
-    # todo: counter goes into sub folder and re_counts files and adds to counter object
-    # todo: make get file size an optional argument that can be turned on/off
-    # todo: write exception handling for access denied
+
+
+
 
     recursive_subdir(target_dir)
