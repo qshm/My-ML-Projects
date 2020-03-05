@@ -1,0 +1,77 @@
+
+
+//============================================================================
+// Name        : eurocall.cpp
+// Author      : 
+// Version     :
+// Copyright   : Your copyright notice
+// Description : Hello World in C++, Ansi-style
+//============================================================================
+//============================================================================
+// Name        : option.cpp American call option pricing
+// Author      :
+// Version     :
+// Copyright   : Your copyright notice
+// Description : Hello World in C++, Ansi-style
+//============================================================================
+
+#include <iostream>
+#include <cstdlib> //rand()
+#include <ctime> //time()
+#include <cmath>
+using namespace std;
+
+double randn(){
+	double u1 = double (rand()) / (RAND_MAX);
+	double u2 = double (rand()) / (RAND_MAX);
+
+	double x1 = -2 * log(u1);
+	double x2 = 2 * M_PI * u2;
+
+	double r = sqrt(x1);
+	double y1 = r * cos(x2);
+
+	return y1;
+	}
+
+double euro_call_maturity(double S_0, double X, double T, double r, double sigma, unsigned long K=1000) {
+	srand(time(NULL));
+
+	double c=0; //payoff at maturity
+	double S_T; //price of asset at maturity
+	double c_0; //euro call price at T zero
+	unsigned long i; //
+
+					for (i=0; i<K; i++){
+					S_T = S_0 * exp((r-0.5*sigma*sigma)*T + sigma*randn()*sqrt(T));
+
+						if (S_T > X)
+						{c = c + S_T - X;} //sums all payoffs at maturity K times
+					}
+		c_0 = exp(-r*T)*(c/K); // c/K is the expected payoff at maturity, we discount it
+	return c_0;
+	}
+
+int main() {
+
+		double S_0 = 10; //spot price
+		double X = 10; //strike price
+		double T = 0.25; //time in years
+		double r = 0.07; //annual risk free rate
+		double sigma= 0.25; //annual volatility
+		unsigned long K = 20000; // number of monte carlo trials
+
+		double c = euro_call_maturity(S_0, X, T, r, sigma, K);
+
+		cout << "Spot: " << S_0 << endl;
+		cout << "Strike: " << X << endl;
+		cout << "Years to maturity: " << T << endl;
+		cout << "Risk free rate: " << r << endl;
+		cout << "Volatility: " << sigma << endl;
+		cout << "Number of Monte Carlo trials: " << K << endl;
+		cout << "" << endl;
+		cout << "Estimated Euro call option price: " << c << endl;
+
+
+	return 0;
+}

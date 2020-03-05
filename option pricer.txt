@@ -1,0 +1,154 @@
+
+//============================================================================
+// Name        : option_pricer_midterm.cpp
+// Author      : 
+// Version     :
+// Copyright   : Your copyright notice
+// Description : Hello World in C++, Ansi-style
+//============================================================================
+
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+
+using namespace std;
+
+class OptionPricer {
+
+private:
+
+double randn(){
+		double u1 = double (rand()) / (RAND_MAX+1);
+		double u2 = double (rand()) / (RAND_MAX+1);
+
+		double x1 = -2 * log(u1);
+		double x2 = 2 * M_PI * u2;
+
+		double rd = sqrt(x1);
+		double y1 = rd * cos(x2);
+
+		return y1;
+		}
+
+double Pricer(double S0, double K, double T, string C= "CALL", string type="EUROPEAN", int Steps=1) {
+
+		double S_T=0; //price of stock at maturity
+		double x=0; //payoff at maturity
+		double x_0=0; //option price today
+
+		// vanilla European Call & Put pricing
+		if (type== "EUROPEAN") {
+			if (C == "CALL") {
+				srand(time(NULL));
+				for (int i=0; i<N; i++){
+					S_T = S0 * exp((Interest-0.5*Vol*Vol)*T + Vol*randn()*sqrt(T));
+						if (S_T > K)
+						{x = x + S_T - K;} //sums all payoffs at maturity
+				}
+				x_0 = exp(-Interest*T)*(x/N); // x/N is the expected payoff at maturity, we discount it
+				return x_0;
+			}
+			if (C == "PUT") {
+				srand(time(NULL));
+				for (int i=0; i<N; i++){
+					S_T = S0 * exp((Interest-0.5*Vol*Vol)*T + Vol*randn()*sqrt(T));
+						if (S_T < K)
+						{x = x + K - S_T;} //sums all payoffs at maturity
+				}
+				x_0 = exp(-Interest*T)*(x/N); // x/N is the expected payoff at maturity, we discount it
+				return x_0;
+
+			}
+		}
+
+		// Fixed strike, arithmetic Asian Call & Put pricing
+		if (type== "ASIAN") {
+					double t = T / Steps;  // length of each step to reach maturity (T)
+					double sum_S_T; // sum of stock prices along the path for Asian options
+					double av_S_T=0; //average stock price along the path for Asian options
+
+					if (C == "CALL") {
+						srand(time(NULL));
+						for (int i=0; i<N; i++){
+								S_T = S0; // resets S_T to S0 for each trial
+								sum_S_T = 0; // resets sum to 0 for each trial
+
+								for (int ii=0; ii<Steps; ii++){
+
+									S_T = S_T* exp((Interest-0.5*Vol*Vol)*t + Vol*randn()*sqrt(t)); //increments stock price
+									sum_S_T += S_T;
+								}
+
+								av_S_T = sum_S_T / Steps; //finds the average stock price along the path
+
+								if (av_S_T > K)
+								{x = x + av_S_T - K;} //sums all payoffs at maturity N times if average stock price > K
+
+						}
+						x_0 = exp(-Interest*T)*(x/N); // x/N is the expected payoff at maturity, we discount it
+						return x_0;
+					}
+
+					if (C == "PUT") {
+						srand(time(NULL));
+						for (int i=0; i<N; i++){
+								S_T = S0; // resets S_T to S0 for each trial
+								sum_S_T = 0; // resets sum to 0 for each trial
+
+								for (int ii=0; ii<Steps; ii++){
+
+									S_T = S_T* exp((Interest-0.5*Vol*Vol)*t + Vol*randn()*sqrt(t)); //increments stock price
+									sum_S_T += S_T;
+								}
+
+								av_S_T = sum_S_T / Steps; //finds the average stock price along the path
+
+								if (av_S_T < K)
+								{x = x + K - av_S_T;} //sums all payoffs at maturity N times if average stock price < K
+
+						}
+						x_0 = exp(-Interest*T)*(x/N); // x/N is the expected payoff at maturity, we discount it
+						return x_0;
+
+
+					}
+				}
+				return 0;
+			};
+
+public:
+
+double Vol;
+double Interest;
+double N; // # Monte Carlo trials
+
+OptionPricer(double v=0.0, double r=0.0, double n=1) { //takes global inputs for Vol, Interest & #Trials
+Vol = v;
+Interest = r;
+N = n;
+};
+
+
+double CallPriceEuropean(double S0, double K, double T) //calls Pricer function
+	{return Pricer(S0, K, T, "CALL", "EUROPEAN");}
+double PutPriceEuropean(double S0, double K, double T)
+	{return Pricer(S0, K, T, "PUT", "EUROPEAN");}
+double CallPriceAsian(double S0, double K, double T, int Steps)
+	{return Pricer(S0, K, T, "CALL", "ASIAN", Steps); }
+double PutPriceAsian(double S0, double K, double T, int Steps)
+	{return Pricer(S0, K, T, "PUT", "ASIAN", Steps);}
+
+};
+
+int main() {
+
+	OptionPricer a(0.1, 0.05, 1000); // object "a" of class OptionPricer is assigned values
+
+	cout << a.CallPriceEuropean(15,16,1) << endl; //takes values for S0, K, T and recalls pricer function
+	cout << a.PutPriceEuropean(15,16,1) << endl;
+	cout << a.CallPriceAsian(15,16,1,15) << endl;
+	cout << a.PutPriceAsian(15,16,1,15) << endl; //takes values for S0, K, T and steps and recalls pricer function
+
+	return 0;
+}
