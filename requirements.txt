@@ -5,7 +5,7 @@ plotly==4.7.1
 statsmodels==0.10.1
 attrs==19.3.0
 backcall==0.1.0
-bleach==3.1.0
+bleach==3.1.4
 Brotli==1.0.7
 certifi==2019.11.28
 click==7.1.2
